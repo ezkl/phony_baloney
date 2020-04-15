@@ -12,7 +12,7 @@ which can replay a set of replies and assert the expected network chatter.
 * Low-level support
   * [x] TCP
   * [x] UDP
-  * [ ] Unix socket
+  * [x] Unix socket
 * Considerations
   * [ ] Smoother API for sending and asserting request/replies?
 * High-level support
@@ -51,6 +51,27 @@ x.run do |buf|
   large += "\n"
 
   cl = TCPSocket.new("localhost", 8126)
+  cl << "aaa\n"
+  cl << large
+  cl << "ccccc"
+
+  assert_equal "aaa\n", buf.gets
+  assert_equal large, buf.gets
+  assert_equal "ccccc", buf.read(6)
+
+  cl.close
+end
+
+#
+#  UNIX Socket example
+#
+
+x = PhonyBaloney::Server::UNIX.new(path: '/tmp/phony_test.sock')
+x.run do |buf|
+  large = "bbbbbbbbbbbbbbbbbbbbbbbb" * 1024
+  large += "\n"
+
+  cl = UNIXSocket.new('/tmp/phony_test.sock')
   cl << "aaa\n"
   cl << large
   cl << "ccccc"
