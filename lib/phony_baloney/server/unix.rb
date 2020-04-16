@@ -24,21 +24,15 @@ module PhonyBaloney
         Thread.current.report_on_exception = true
         client = @socket.accept
         begin
-          msg = ""
-
           loop do
             return if @stopping
 
-            rc = client.recv_nonblock(16384)
+            rc = client.recv(16384)
 
-            @buf << msg if msg != ""
             @buf << rc
-            msg = ""
           end
 
         rescue IO::WaitReadable
-          @buf << msg if msg != ""
-          msg = ""
           IO.select([@socket])
           retry
         rescue Errno::EBADF
